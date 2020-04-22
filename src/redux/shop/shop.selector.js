@@ -6,5 +6,5 @@ export const selectCollections = createSelector(
 	[
 		selectShop,
 	],
-	(shop) => shop.shopItems
+	(shop) => shop.collections
 );
