@@ -9,14 +9,12 @@ const config = {
 	projectId         : 'crown-db-73a13',
 	storageBucket     : 'crown-db-73a13.appspot.com',
 	messagingSenderId : '266651686313',
-	appId             : '1:266651686313:web:042037c40a5fa0d29620b8'
+	appId             : '1:266651686313:web:042037c40a5fa0d29620b8',
 };
 firebase.initializeApp(config);
 
-export const createUserProfileDocument = async (
-	userAuth,
-	additionalData
-) => {
+//create a user profile document in firestore to capture the user info from 3rd party and local auth
+export const createUserProfileDocument = async (userAuth, additionalData) => {
 	if (!userAuth) return;
 
 	const userRef = firestore.doc(`users/${userAuth.uid}`);
@@ -31,13 +29,45 @@ export const createUserProfileDocument = async (
 				displayName,
 				email,
 				createdAt,
-				...additionalData
+				...additionalData,
 			});
 		} catch (error) {
 			console.log('error creating user', error.message);
 		}
 	}
 	return userRef;
+};
+
+export const addCollectionAndDocuments = async (
+	collectionKey,
+	objectsToAdd
+) => {
+	const collectionRef = firestore.collection(collectionKey);
+
+	const batch = firestore.batch();
+	objectsToAdd.forEach((obj) => {
+		const newDocRef = collectionRef.doc();
+		batch.set(newDocRef, obj);
+	});
+	return await batch.commit();
+};
+
+export const convertCollectionsSnapshotToMap = (collections) => {
+	const transformedCollection = collections.docs.map((doc) => {
+		const { title, items } = doc.data();
+
+		return {
+			routeName : encodeURI(title.toLowerCase()),
+			id        : doc.id,
+			title,
+			items,
+		};
+	});
+
+	return transformedCollection.reduce((accumulator, collection) => {
+		accumulator[collection.title.toLowerCase()] = collection;
+		return accumulator;
+	}, {});
 };
 
 export const auth = firebase.auth();
