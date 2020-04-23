@@ -1,54 +1,37 @@
 import React from 'react';
 import { Route } from 'react-router-dom';
-import { createStructuredSelector } from 'reselect';
 import { connect } from 'react-redux';
 
-import CollectionsOverview from '../../components/collections-overview/collections-overview.component';
-import CollectionPage from '../collection/collection.component';
-import { fetchCollectionsStartAsync } from '../../redux/shop/shop.actions';
-import { selectIsCollectionFectching } from '../../redux/shop/shop.selector';
-import WithSpinner from '../../components/with-spinner/with-spinner.component';
+import collectionPageContainer from '../collection/collection.container';
+import collectionsOverViewContainer from '../../components/collections-overview/collections-overview.container';
 
-const CollectionsOverviewWithSpinner = WithSpinner(CollectionsOverview);
-const CollectionPageWithSpinner = WithSpinner(CollectionPage);
+import { fetchCollectionsStartAsync } from '../../redux/shop/shop.actions';
 
 class ShopPage extends React.Component {
 	componentDidMount () {
 		const { fetchCollectionsStartAsync } = this.props;
+
 		fetchCollectionsStartAsync();
 	}
 
 	render () {
-		const { match, isCollectionFecthing } = this.props;
+		const { match } = this.props;
+
 		return (
 			<div className='shop-page'>
 				<Route
 					exact
 					path={`${match.path}`}
-					render={(props) => (
-						<CollectionsOverviewWithSpinner
-							isLoading={isCollectionFecthing}
-							{...props}
-						/>
-					)}
+					component={collectionsOverViewContainer}
 				/>
 				<Route
 					path={`${match.path}/:collectionId`}
-					render={(props) => (
-						<CollectionPageWithSpinner
-							isLoading={isCollectionFecthing}
-							{...props}
-						/>
-					)}
+					component={collectionPageContainer}
 				/>
 			</div>
 		);
 	}
 }
-
-const mapStateToProps = createStructuredSelector({
-	isCollectionFecthing : selectIsCollectionFectching,
-});
 
 const mapDispatchToProps = (dispatch) => ({
 	fetchCollectionsStartAsync : () => dispatch(fetchCollectionsStartAsync()),
